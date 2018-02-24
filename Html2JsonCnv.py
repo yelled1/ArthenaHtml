@@ -40,6 +40,14 @@ def parseFile(f, dbg=True):
     else:
         return artist, title, currncy, amount
 
+def cCurr(Curr):
+    if Curr == 'GBP':  return 1.34
+    else: return 1
+
+def converCurrAdd(artDict): return [float(w['amount'].replace(',',''))*cCurr(w['currency']) for w in artDict['works']]
+    #return [float(w['amount'].replace(',','')) for w in artDict['works']]
+#    return [w['amount'] for w in artDict['works']]
+
 if __name__ == '__main__':
     #fileDict = {}
     #soupDict = {}
@@ -54,5 +62,8 @@ if __name__ == '__main__':
             jsonList.append({ 'artist': artist_name, 'works': [addDict] })
         else:
             jsonList[artists.index(artist_name)]['works'].append( addDict )
-    for j in jsonList: print(j)
+    #for j in jsonList: print(j)
+    for j in jsonList:
+        j['totalValue'] ='USD {0:,g}'.format(sum(converCurrAdd(j)))
 #[x['artist'] for x in jsonList]
+    print(jsonList)
