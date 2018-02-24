@@ -8,6 +8,8 @@ def title_crunch(title_text):
     title_split = title_text.split(':')
     t_artist = re.sub('\(.*\)', '',title_split[0]).strip()
     t_title  = re.sub(t_artist, '', title_text).strip()
+    if t_title[:2] == ': ':
+        t_title = t_title[2:]
     return (t_artist, t_title)
 
 def getCurrencies(fnm="./currencies.txt"):
@@ -21,14 +23,24 @@ def parseFile(f):
     artist, title = None, None
     artist, title = title_crunch(soup.title.text.strip())
     if not artist: raise ValueError('artist was not found by the title_crunch function!')
-    return artist
+    return artist, title
 
 if __name__ == '__main__':
     #fileDict = {}
     #soupDict = {}
     currencies = getCurrencies()
-    artists = []
+    jsonList = []
     htmlFiles = [f for dir in glob.glob('data/*') for f in glob.glob(dir+'/*')]
     for fnm in htmlFiles:
-        artists.append(parseFile(fnm))
-    print(artists)
+        artist_name, title_work = (parseFile(fnm))
+        artists = [x['artist'] for x in jsonList]
+        if artist_name not in artists:
+            jsonList.append({ 'artist': artist_name, 'works': [title_work] })
+        else:
+            jsonList[artists.index(artist_name)]['works'].append(title_work)
+    for j in jsonList: print(j)
+
+
+[x['artist'] for x in jsonList]
+
+jsonList
