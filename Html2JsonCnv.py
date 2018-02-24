@@ -17,13 +17,15 @@ def getCurrencies(fnm="./currencies.txt"):
         return [c.split('\t')[0] for c in fc.read().split('\n')]
 
 def parseFile(f):
+    artist, title, price = None, None, None
     with open(f) as fp:
         lns = fp.read()
         soup = BeautifulSoup(lns, "html.parser")
-    artist, title = None, None
+        div = [tg.text for tg in soup.findAll('div')]
+        price  = [ d for d in div if re.match(reCURRSTR, d) != None][0]
     artist, title = title_crunch(soup.title.text.strip())
     if not artist: raise ValueError('artist was not found by the title_crunch function!')
-    return artist, title
+    return artist, title, price
 
 if __name__ == '__main__':
     #fileDict = {}
@@ -32,12 +34,12 @@ if __name__ == '__main__':
     jsonList = []
     htmlFiles = [f for dir in glob.glob('data/*') for f in glob.glob(dir+'/*')]
     for fnm in htmlFiles:
-        artist_name, title_work = (parseFile(fnm))
+        artist_name, title_work, prc = (parseFile(fnm))
         artists = [x['artist'] for x in jsonList]
         if artist_name not in artists:
-            jsonList.append({ 'artist': artist_name, 'works': [title_work] })
+            jsonList.append({ 'artist': artist_name, 'works': [{'title': title_work, 'price': prc}] })
         else:
-            jsonList[artists.index(artist_name)]['works'].append(title_work)
+            jsonList[artists.index(artist_name)]['works'].append({'title': title_work, 'price': prc})
     for j in jsonList: print(j)
 
 
